@@ -13,6 +13,7 @@ class _NotesScreenState extends State<NotesScreen> {
   TextEditingController titleController = TextEditingController();
   TextEditingController descController = TextEditingController();
   TextEditingController dateController = TextEditingController();
+  int selectedColorIndex = 0;
   @override
   Widget build(BuildContext context) {
     return SafeArea(
@@ -23,6 +24,7 @@ class _NotesScreenState extends State<NotesScreen> {
               titleController.clear();
               descController.clear();
               dateController.clear();
+              selectedColorIndex = 0;
               _customBottomSheet(context);
             },
             child: Icon(Icons.add),
@@ -30,13 +32,17 @@ class _NotesScreenState extends State<NotesScreen> {
           body: ListView.separated(
               padding: EdgeInsets.all(15),
               itemBuilder: (context, index) => NoteCard(
+                    noteColor: DummyDb
+                        .noteColors[DummyDb.notesList[index]["colorIndex"]],
                     date: DummyDb.notesList[index]["date"],
                     desc: DummyDb.notesList[index]["desc"],
                     title: DummyDb.notesList[index]["title"],
+                    // for deletion
                     onDelete: () {
                       DummyDb.notesList.removeAt(index);
                       setState(() {});
                     },
+                    // for editing
                     onEdit: () {
                       titleController.text = DummyDb.notesList[index]["title"];
                       dateController.text = DummyDb.notesList[index]["date"];
@@ -98,6 +104,35 @@ class _NotesScreenState extends State<NotesScreen> {
                               borderRadius: BorderRadius.circular(10))),
                     ),
                     SizedBox(height: 20),
+                    //build color section
+                    StatefulBuilder(
+                      builder: (context, setColorState) => Row(
+                        children: List.generate(
+                          DummyDb.noteColors.length,
+                          (index) => Expanded(
+                            child: InkWell(
+                              onTap: () {
+                                selectedColorIndex = index;
+                                setColorState(
+                                  () {},
+                                );
+                              },
+                              child: Container(
+                                margin: EdgeInsets.symmetric(horizontal: 5),
+                                height: 50,
+                                decoration: BoxDecoration(
+                                    border: selectedColorIndex == index
+                                        ? Border.all(width: 3)
+                                        : null,
+                                    color: DummyDb.noteColors[index],
+                                    borderRadius: BorderRadius.circular(10)),
+                              ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    SizedBox(height: 20),
                     Row(
                       children: [
                         Expanded(
@@ -125,17 +160,21 @@ class _NotesScreenState extends State<NotesScreen> {
                         Expanded(
                           child: InkWell(
                             onTap: () {
-                              isEdit
-                                  ? DummyDb.notesList[itemIndex!] = {
-                                      "title": titleController.text,
-                                      "desc": descController.text,
-                                      "date": dateController.text
-                                    }
-                                  : DummyDb.notesList.add({
-                                      "title": titleController.text,
-                                      "desc": descController.text,
-                                      "date": dateController.text
-                                    });
+                              if (isEdit == true) {
+                                DummyDb.notesList[itemIndex!] = {
+                                  "title": titleController.text,
+                                  "desc": descController.text,
+                                  "colorIndex": selectedColorIndex,
+                                  "date": dateController.text,
+                                };
+                              } else {
+                                DummyDb.notesList.add({
+                                  "title": titleController.text,
+                                  "desc": descController.text,
+                                  "date": dateController.text,
+                                  "colorIndex": selectedColorIndex
+                                });
+                              }
                               Navigator.pop(context);
                               setState(() {});
                             },

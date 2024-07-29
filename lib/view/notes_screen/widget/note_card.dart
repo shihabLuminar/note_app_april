@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:share_plus/share_plus.dart';
 
 class NoteCard extends StatelessWidget {
   const NoteCard(
@@ -7,12 +8,14 @@ class NoteCard extends StatelessWidget {
       required this.title,
       required this.desc,
       required this.date,
-      this.onEdit});
+      this.onEdit,
+      required this.noteColor});
   final void Function()? onDelete;
   final void Function()? onEdit;
   final String title;
   final String desc;
   final String date;
+  final Color noteColor;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +25,7 @@ class NoteCard extends StatelessWidget {
         vertical: 10,
       ),
       decoration: BoxDecoration(
-        color: Colors.red.shade300,
+        color: noteColor,
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(
@@ -66,7 +69,9 @@ class NoteCard extends StatelessWidget {
                     fontWeight: FontWeight.normal),
               ),
               IconButton(
-                  onPressed: () {},
+                  onPressed: () {
+                    Share.share("$title \n$desc \n$date");
+                  },
                   icon: Icon(Icons.share, color: Colors.black)),
             ],
           ),
